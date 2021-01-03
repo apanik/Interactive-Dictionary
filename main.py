@@ -1,27 +1,20 @@
-import json
-from difflib import get_close_matches
+import requests
 
-data = json.load(open("data.json"))
+app_id = '5c77b0a4'
+app_key = '7647b13cb131b250c4f7fc87e2788a20'
 
-def translate(w):
-    w = w.lower()
-    if w in data:
-        return data[w]
-    elif len(get_close_matches(w, data.keys())) > 0:
-        yn = input("Did you mean %s instead? Enter Y if yes, or N if no: " % get_close_matches(w, data.keys())[0])
-        if yn == "Y":
-            return data[get_close_matches(w, data.keys())[0]]
-        elif yn == "N":
-            return "The word doesn't exist. Please double check it."
-        else:
-            return "We didn't understand your entry."
-    else:
-        return "The word doesn't exist. Please double check it."
-
-word = input("Enter word: ")
-output = translate(word)
-if type(output) == list:
-    for item in output:
-        print(item)
+language = 'en-gb'
+word = input("Please Enter a word:  ")
+word_id = word
+fields = 'definitions'
+strictMatch = 'false'
+url = 'https://od-api.oxforddictionaries.com:443/api/v2/entries/' + language + '/' + word_id.lower() + '?fields=' + fields + '&strictMatch=' + strictMatch
+r = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key})
+data_string = r.json()
+if r.status_code != 404:
+    definitions = data_string['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions']
+    print(definitions[0])
 else:
-    print(output)
+    print("The text you entered is not a valid word...Try Again")
+
+
